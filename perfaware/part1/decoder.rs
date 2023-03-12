@@ -260,6 +260,10 @@ fn parse_imm_to_acc(bs: &mut impl Iterator<Item = u8>) -> (Loc, Loc) {
 }
 
 fn parse_imm_to_r_m(bs: &mut impl Iterator<Item = u8>, should_look_at_s: bool) -> (Loc, Loc) {
+    // let mut b_split = bs.peekable();
+    //let b_prime = b_split.peek().unwrap(); // This approach wont work. Using peek for the first time on a peekable iter will call next
+                                            // on the underlying iterator. This means that we will eventually read an argument byte as an operand byte which is BAD.
+    //println!("call b_prime to {:b}", b_prime);
     let b0 = bs.next().unwrap();
     let b1 = bs.next().unwrap();
 
@@ -343,6 +347,7 @@ fn main() {
             let asm = parse_imm_to_reg(&mut bytes).asm();
             println!("{}", asm);
         } else if byte >> 1 == 0b_110_0011  {
+            println!("GOT MOV INSTR FOR IMM TO RM: {:b}", bytes.peek().unwrap());
             let (src, dst) = parse_imm_to_r_m(&mut bytes, false);
             println!("{}", Mov { src, dst }.asm());
         } else if byte >> 1 == 0b_101_0000  {
@@ -358,6 +363,7 @@ fn main() {
             println!("{}", Add { src, dst }.asm());
         // immediate to register / memory
         } else if byte >> 2 == 0b_10_0000 {
+            println!("GOT ADD INSTR FOR IMM TO RM: {:b}", bytes.peek().unwrap());
             let (src, dst) = parse_imm_to_r_m(&mut bytes, true);
             println!("{}", Add { src, dst }.asm());
         // immediate to accumulator
